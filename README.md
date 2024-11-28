@@ -5,7 +5,6 @@ An AI-powered Question Answering application that allows users to upload PDF doc
 ## **Table of Contents**
 
 - [Features](#features)
-- [Demo](#demo)
 - [Installation](#installation)
 
 ## **Features**
@@ -16,10 +15,7 @@ An AI-powered Question Answering application that allows users to upload PDF doc
 - **Adjustable Parameters**: Customize the number of documents to retrieve for context.
 - **Feedback Mechanism**: Provide feedback on the helpfulness of the AI assistant's responses.
 - **Interactive Interface**: User-friendly interface built with Streamlit, featuring tabs and interactive elements.
-
-## **Demo**
-
-[Include a link to a live demo if available or screenshots of the application.]
+]
 
 ## **Installation**
 
