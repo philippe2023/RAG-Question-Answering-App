@@ -4,5 +4,5 @@ langchain-community==0.0.4
 chromadb==0.3.26
 ollama
 sentence-transformers==2.2.2
-PyMuPDF==1.21.1
+PyMuPDF==1.18.19
 PyYAML==6.0.1
