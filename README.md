@@ -7,13 +7,6 @@ An AI-powered Question Answering application that allows users to upload PDF doc
 - [Features](#features)
 - [Demo](#demo)
 - [Installation](#installation)
-- [Usage](#usage)
-- [Configuration](#configuration)
-- [Requirements](#requirements)
-- [Project Structure](#project-structure)
-- [Contributing](#contributing)
-- [License](#license)
-- [Acknowledgments](#acknowledgments)
 
 ## **Features**
 
