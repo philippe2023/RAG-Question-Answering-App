@@ -1,7 +1,8 @@
-streamlit
-langchain
-chromadb
+streamlit==1.40.2
+langchain==0.0.309
+langchain-community==0.0.4
+chromadb==0.3.26
 ollama
-sentence-transformers
-PyMuPDF
-pyyaml
+sentence-transformers==2.2.2
+PyMuPDF==1.21.1
+PyYAML==6.0.1
