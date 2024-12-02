@@ -1,21 +1,31 @@
+# main.py
+
 import os
 import logging
 
 import streamlit as st
+from streamlit.runtime.state import SessionState
 
 from document_processing import process_document, is_document_already_processed
-from vector_store import add_to_vector_collection, query_collection, list_uploaded_documents, delete_document
+from vector_store import (
+    add_to_vector_collection,
+    query_collection,
+    list_uploaded_documents,
+    delete_document,
+)
 from llm_interface import call_llm
-from utils import re_rank_cross_encoders
+from utils import re_rank_cross_encoders, normalize_scores, get_confidence_color
 import yaml
 
 # Configure logging
-logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
+logging.basicConfig(
+    level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s"
+)
 
 st.set_page_config(page_title="RAG Question Answer", layout="wide")
 
 def load_config():
-    with open('config.yaml', 'r') as f:
+    with open("config.yaml", "r") as f:
         return yaml.safe_load(f)
 
 config = load_config()
@@ -26,22 +36,41 @@ def main():
         st.title("Document Assistant")
         st.markdown("Upload documents and ask questions based on their content.")
 
-        uploaded_files = st.file_uploader("Upload PDFs", type=["pdf"], accept_multiple_files=True)
+        # Language selection
+        language_options = {
+            "English": "en",
+            "German": "de",
+            "French": "fr",
+            "Spanish": "es",
+            # Add more languages as needed
+        }
+        selected_language_name = st.selectbox("Select Output Language:", list(language_options.keys()))
+        selected_language = language_options[selected_language_name]
+        # Store the selected language code in session state
+        st.session_state['selected_language'] = selected_language
+
+        # File uploader
+        uploaded_files = st.file_uploader(
+            "Upload PDFs", type=["pdf"], accept_multiple_files=True
+        )
         if st.button("Process Documents"):
             if uploaded_files:
                 with st.spinner("Processing documents..."):
                     for uploaded_file in uploaded_files:
-                        normalize_uploaded_file_name = uploaded_file.name.translate(
-                            str.maketrans({"-": "_", ".": "_", " ": "_"})
-                        )
-                        if is_document_already_processed(normalize_uploaded_file_name):
-                            st.info(f"Document '{uploaded_file.name}' has already been processed.")
+                        # Check if the document has already been processed
+                        if is_document_already_processed(uploaded_file.name):
+                            st.warning(
+                                f"Document '{uploaded_file.name}' has already been processed."
+                            )
                             continue
-                        all_splits = process_document(
-                            uploaded_file, chunk_size=config['chunk_size'], chunk_overlap=config['chunk_overlap']
+                        # Process the document
+                        docs = process_document(
+                            uploaded_file,
+                            chunk_size=config["chunk_size"],
+                            chunk_overlap=config["chunk_overlap"],
                         )
-                        if all_splits:
-                            add_to_vector_collection(all_splits, normalize_uploaded_file_name)
+                        # Add to vector collection
+                        add_to_vector_collection(docs, uploaded_file.name)
             else:
                 st.warning("Please upload at least one PDF file.")
 
@@ -50,40 +79,51 @@ def main():
 
     with tab1:
         st.header("Ask a Question")
-        question = st.text_area("Enter your question:")
-        n_results = st.slider("Number of documents to use:", 1, 20, 10)
-        if st.button("Get Answer"):
+        question = st.text_area("Enter your question:", key="question_input")
+        n_results = st.slider("Number of documents to use:", 1, 20, 10, key="n_results_slider")
+        if st.button("Get Answer", key="get_answer_button"):
             if question:
                 with st.spinner("Retrieving answer..."):
-                    results = query_collection(question, n_results=n_results)
-                    if results and results.get("documents"):
-                        context = results.get("documents")[0]
-                        relevant_text, relevant_text_ids = re_rank_cross_encoders(question, context)
-                        if relevant_text:
-                            response = call_llm(context=relevant_text, prompt=question)
-                            placeholder = st.empty()
-                            response_text = ""
-                            for chunk in response:
-                                response_text += chunk
-                                placeholder.markdown(response_text)
-                            with st.expander("See retrieved documents"):
-                                st.write(results)
-                            with st.expander("See most relevant document ids"):
-                                st.write(relevant_text_ids)
-                                st.write(relevant_text)
-                            # Feedback Section
-                            st.markdown("### Feedback")
-                            feedback = st.radio(
-                                "Was this answer helpful?",
-                                ("Yes", "Somewhat", "No"),
-                                horizontal=True,
-                                key=f"feedback_{question}"
-                            )
-                            if st.button("Submit Feedback", key=f"submit_feedback_{question}"):
-                                # Store feedback (implement storage logic)
-                                st.success("Thank you for your feedback!")
+                    # Query the vector store and generate an answer
+                    results = query_collection(question, n_results)
+                    if results and 'documents' in results and 'distances' in results:
+                        documents = results['documents'][0]  # Assuming single query
+                        distances = results['distances'][0]
+                        # Normalize retrieval scores
+                        retrieval_scores = normalize_scores(distances)
+                        # Re-rank documents
+                        relevant_text, relevant_indices, re_rank_scores = re_rank_cross_encoders(question, documents)
+                        # Combine scores for the top documents
+                        combined_scores = []
+                        for i in range(len(relevant_indices)):
+                            idx = relevant_indices[i]
+                            combined_score = (retrieval_scores[idx] + re_rank_scores[i]) / 2
+                            combined_scores.append(combined_score)
+                        # Compute overall confidence score
+                        if combined_scores:
+                            confidence_score = sum(combined_scores) / len(combined_scores)
                         else:
-                            st.warning("No relevant context found to answer the question.")
+                            confidence_score = 0.0
+                        # Display the confidence score
+                        color = get_confidence_color(confidence_score)
+                        st.markdown(f"**Confidence Score:** <span style='color:{color}'>{confidence_score:.2f}</span>", unsafe_allow_html=True)
+                        # Retrieve the selected language
+                        selected_language = st.session_state.get('selected_language', 'en')
+                        # Generate the answer
+                        response_generator = call_llm(relevant_text, question, selected_language)
+                        # Display the answer using a placeholder
+                        answer_placeholder = st.empty()
+                        answer = ""
+                        if selected_language == 'en':
+                            # Stream the response
+                            for chunk in response_generator:
+                                answer += chunk
+                                answer_placeholder.markdown(answer)
+                        else:
+                            # Get the full translated response
+                            for translated_text in response_generator:
+                                answer = translated_text
+                            answer_placeholder.markdown(answer)
                     else:
                         st.warning("No relevant documents found.")
             else:
@@ -100,10 +140,7 @@ def main():
                     if st.button(f"Reprocess {doc}", key=f"reprocess_{doc}"):
                         # Reprocess the document
                         st.info(f"Reprocessing {doc}...")
-                        # Implement reprocessing logic
-                        # For reprocessing, you may need to re-upload the document or store the original content
-                        # Here, we'll assume the original document is accessible
-                        # For simplicity, this part is left as a placeholder
+                        # (Reprocessing logic)
                 with col2:
                     if st.button(f"Delete {doc}", key=f"delete_{doc}"):
                         # Delete the document
