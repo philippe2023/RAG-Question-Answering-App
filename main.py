@@ -51,7 +51,9 @@ def main():
 
         # File uploader
         uploaded_files = st.file_uploader(
-            "Upload PDFs", type=["pdf"], accept_multiple_files=True
+            "Upload Documents",
+            type=["pdf", "docx", "txt", "html"],
+            accept_multiple_files=True
         )
         if st.button("Process Documents"):
             if uploaded_files:
@@ -72,7 +74,7 @@ def main():
                         # Add to vector collection
                         add_to_vector_collection(docs, uploaded_file.name)
             else:
-                st.warning("Please upload at least one PDF file.")
+                st.warning("Please upload at least one document.")
 
     # Main Content
     tab1, tab2 = st.tabs(["Ask Questions", "Document Library"])
