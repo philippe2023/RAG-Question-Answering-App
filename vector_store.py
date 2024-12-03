@@ -68,7 +68,7 @@ def query_collection(prompt: str, n_results: int = 10):
         results = collection.query(
             query_texts=[prompt],
             n_results=n_results,
-            include=['documents', 'distances']
+            include=['documents', 'distances', 'metadatas']
         )
         return results
     except Exception as e:

@@ -1,5 +1,3 @@
-# main.py
-
 import os
 import logging
 
@@ -14,7 +12,9 @@ from vector_store import (
     delete_document,
 )
 from llm_interface import call_llm
+from chat import chat_interface
 from utils import re_rank_cross_encoders, normalize_scores, get_confidence_color
+from deep_translator import GoogleTranslator
 import yaml
 
 # Configure logging
@@ -42,7 +42,6 @@ def main():
             "German": "de",
             "French": "fr",
             "Spanish": "es",
-            # Add more languages as needed
         }
         selected_language_name = st.selectbox("Select Output Language:", list(language_options.keys()))
         selected_language = language_options[selected_language_name]
@@ -77,7 +76,7 @@ def main():
                 st.warning("Please upload at least one document.")
 
     # Main Content
-    tab1, tab2 = st.tabs(["Ask Questions", "Document Library"])
+    tab1, tab2, tab3 = st.tabs(["Ask Questions", "Document Library", "Chat"])
 
     with tab1:
         st.header("Ask a Question")
@@ -91,6 +90,7 @@ def main():
                     if results and 'documents' in results and 'distances' in results:
                         documents = results['documents'][0]  # Assuming single query
                         distances = results['distances'][0]
+                        metadatas = results['metadatas'][0]  # Retrieve metadata
                         # Normalize retrieval scores
                         retrieval_scores = normalize_scores(distances)
                         # Re-rank documents
@@ -115,17 +115,41 @@ def main():
                         response_generator = call_llm(relevant_text, question, selected_language)
                         # Display the answer using a placeholder
                         answer_placeholder = st.empty()
-                        answer = ""
+                        full_response = ""
+
+                        # Collect the full response
+                        for chunk in response_generator:
+                            full_response += chunk
+
                         if selected_language == 'en':
-                            # Stream the response
-                            for chunk in response_generator:
-                                answer += chunk
-                                answer_placeholder.markdown(answer)
+                            # Display the response in English
+                            answer_placeholder.markdown(full_response)
                         else:
-                            # Get the full translated response
-                            for translated_text in response_generator:
-                                answer = translated_text
-                            answer_placeholder.markdown(answer)
+                            # Translate and display the response
+                            translated_answer = GoogleTranslator(source='auto', target=selected_language).translate(full_response)
+                            answer_placeholder.markdown(translated_answer)
+
+                        # Display sources
+                        st.subheader("Sources")
+                        sources = []
+                        for i, idx in enumerate(relevant_indices):
+                            metadata = metadatas[idx]
+                            file_name = metadata.get('file_name', 'Unknown')
+                            chunk_number = metadata.get('chunk', 'N/A')
+                            source_info = f"**Source {i+1}:** {file_name} (Chunk {chunk_number})"
+                            st.markdown(source_info)
+                            sources.append(source_info)
+
+                        # Combine answer and sources into downloadable content
+                        download_content = f"**Answer:**\n{full_response}\n\n**Sources:**\n" + "\n".join(sources)
+
+                        # Add a download button
+                        st.download_button(
+                            label="Download Answer and Sources",
+                            data=download_content,
+                            file_name="answer_and_sources.txt",
+                            mime="text/plain",
+                        )
                     else:
                         st.warning("No relevant documents found.")
             else:
@@ -150,6 +174,9 @@ def main():
                         st.info(f"Deleted {doc}")
         else:
             st.info("No documents uploaded yet.")
+
+    #with tab3:
+        #chat_interface()
 
 if __name__ == "__main__":
     main()
