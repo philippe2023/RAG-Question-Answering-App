@@ -12,10 +12,13 @@ from vector_store import (
     delete_document,
 )
 from llm_interface import call_llm
-from chat import chat_interface
+# from chat import chat_interface  # currently commented out
 from utils import re_rank_cross_encoders, normalize_scores, get_confidence_color
 from deep_translator import GoogleTranslator
 import yaml
+
+# NEW IMPORT
+from provider_database import find_providers  # Add this line
 
 # Configure logging
 logging.basicConfig(
@@ -82,6 +85,10 @@ def main():
         st.header("Ask a Question")
         question = st.text_area("Enter your question:", key="question_input")
         n_results = st.slider("Number of documents to use:", 1, 20, 10, key="n_results_slider")
+
+        # NEW: Optional location input for filtering providers
+        user_location = st.text_input("Enter your city (optional):")
+
         if st.button("Get Answer", key="get_answer_button"):
             if question:
                 with st.spinner("Retrieving answer..."):
@@ -150,6 +157,70 @@ def main():
                             file_name="answer_and_sources.txt",
                             mime="text/plain",
                         )
+
+                        # NEW: Integrate provider search
+                        # Extract keywords from user query (basic example)
+                        query_keywords = []
+                        # For demonstration, if "headache" in question
+                        if "headache" in question.lower():
+                            query_keywords.append("headache")
+                        # Add more keyword logic if needed
+
+                        if query_keywords:
+                            providers = find_providers(query_keywords, user_location if user_location else None)
+                            st.markdown("### Relevant Service Providers")
+                            if providers:
+                                st.markdown("### Relevant Service Providers")
+                                
+                                # Define a card style with a slight border, padding, and maybe a shadow.
+                                card_style = """
+                                <style>
+                                .provider-card {
+                                    background-color: #f9f9f9;
+                                    border-radius: 8px;
+                                    padding: 10px;
+                                    margin-bottom: 15px;
+                                    box-shadow: 0 0 5px rgba(0,0,0,0.1);
+                                }
+                                .provider-name {
+                                    font-weight: bold;
+                                    font-size: 1.1em;
+                                    color: #333;
+                                    margin-bottom: 5px;
+                                }
+                                .provider-type {
+                                    font-style: italic;
+                                    color: #555;
+                                    margin-bottom: 5px;
+                                }
+                                .provider-location {
+                                    color: #666;
+                                    margin-bottom: 5px;
+                                }
+                                .provider-keywords {
+                                    color: #888;
+                                    font-size: 0.9em;
+                                }
+                                </style>
+                                """
+
+                                st.markdown(card_style, unsafe_allow_html=True)
+
+                                for p in providers:
+                                    # Format provider info as a styled card
+                                    provider_card = f"""
+                                    <div class="provider-card">
+                                        <div class="provider-name">{p['name']}</div>
+                                        <div class="provider-type">{p['type_of_practice']}</div>
+                                        <div class="provider-location">Location: {p['location']}</div>
+                                        <div class="provider-keywords">Keywords: {', '.join(p['keywords'])}</div>
+                                    </div>
+                                    """
+                                    st.markdown(provider_card, unsafe_allow_html=True)
+                            else:
+                                st.info("No matching providers found.")
+                        else:
+                            st.info("No specific symptom keywords recognized. No provider recommendations displayed.")
                     else:
                         st.warning("No relevant documents found.")
             else:
@@ -175,8 +246,8 @@ def main():
         else:
             st.info("No documents uploaded yet.")
 
-    #with tab3:
-        #chat_interface()
+    # with tab3:
+    #     chat_interface()
 
 if __name__ == "__main__":
     main()

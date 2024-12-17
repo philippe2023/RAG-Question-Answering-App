@@ -1,0 +1,122 @@
+[
+    {
+        "name": "Heilpraxis Müller",
+        "type_of_practice": "Acupuncture",
+        "keywords": ["headache", "migraines", "chronic pain", "stress relief"],
+        "location": "Berlin"
+    },
+    {
+        "name": "Naturheilkunde Schmidt",
+        "type_of_practice": "Chinese Medicine",
+        "keywords": ["headache", "digestion issues", "herbal remedies", "fatigue"],
+        "location": "Munich"
+    },
+    {
+        "name": "Wellness & Balance",
+        "type_of_practice": "Aromatherapy",
+        "keywords": ["relaxation", "tension headaches", "anxiety", "sleep improvement"],
+        "location": "Hamburg"
+    },
+    {
+        "name": "Körper & Geist Heilzentrum",
+        "type_of_practice": "Massage Therapy",
+        "keywords": ["muscle tension", "neck pain", "headache", "sports recovery"],
+        "location": "Cologne"
+    },
+    {
+        "name": "Lebensenergie Praxis",
+        "type_of_practice": "Reflexology",
+        "keywords": ["foot pain", "circulation", "stress reduction", "migraine relief"],
+        "location": "Frankfurt"
+    },
+    {
+        "name": "Atem & Ruhe Studio",
+        "type_of_practice": "Breathwork Coaching",
+        "keywords": ["anxiety", "headache", "stress management", "respiratory health"],
+        "location": "Stuttgart"
+    },
+    {
+        "name": "BioKräuter Heilung",
+        "type_of_practice": "Herbalist",
+        "keywords": ["herbal remedies", "immune support", "headache", "allergy relief"],
+        "location": "Dresden"
+    },
+    {
+        "name": "Klang & Harmonie",
+        "type_of_practice": "Sound Therapy",
+        "keywords": ["sleep improvement", "stress relief", "tension headaches", "energy balance"],
+        "location": "Leipzig"
+    },
+    {
+        "name": "Zentrum für Qi Gong",
+        "type_of_practice": "Qi Gong",
+        "keywords": ["chronic fatigue", "balance", "headache prevention", "joint flexibility"],
+        "location": "Berlin"
+    },
+    {
+        "name": "Licht & Leben Praxis",
+        "type_of_practice": "Light Therapy",
+        "keywords": ["seasonal depression", "low energy", "headache", "mood enhancement"],
+        "location": "Munich"
+    },
+    {
+        "name": "Rücken & Wohlgefühl",
+        "type_of_practice": "Chiropractic",
+        "keywords": ["back pain", "posture improvement", "headache from tension", "mobility"],
+        "location": "Hamburg"
+    },
+    {
+        "name": "Ayurveda Oase",
+        "type_of_practice": "Ayurvedic Practitioner",
+        "keywords": ["digestion issues", "headache", "detoxification", "dosha balance"],
+        "location": "Cologne"
+    },
+    {
+        "name": "ErnährungsKompass",
+        "type_of_practice": "Nutritional Therapy",
+        "keywords": ["diet planning", "headache triggers", "weight management", "gut health"],
+        "location": "Frankfurt"
+    },
+    {
+        "name": "MeditationsRaum",
+        "type_of_practice": "Meditation Coach",
+        "keywords": ["anxiety", "chronic stress", "mindfulness", "headache reduction"],
+        "location": "Düsseldorf"
+    },
+    {
+        "name": "Natürliche Gesundheit",
+        "type_of_practice": "Naturopathy",
+        "keywords": ["headache", "allergies", "fatigue", "immune boosting"],
+        "location": "Stuttgart"
+    },
+    {
+        "name": "BewegungsWelt",
+        "type_of_practice": "Physiotherapy",
+        "keywords": ["rehabilitation", "tension headaches", "muscle stiffness", "post-injury recovery"],
+        "location": "Dresden"
+    },
+    {
+        "name": "Zentrum für Hypnose",
+        "type_of_practice": "Hypnotherapy",
+        "keywords": ["stress relief", "habit change", "headache coping", "anxiety reduction"],
+        "location": "Leipzig"
+    },
+    {
+        "name": "Therapie am Fluss",
+        "type_of_practice": "Shiatsu",
+        "keywords": ["energy flow", "neck pain", "migraine relief", "stress harmony"],
+        "location": "Berlin"
+    },
+    {
+        "name": "Ausgleich & Natur",
+        "type_of_practice": "Homeopathy",
+        "keywords": ["headache", "chronic ailments", "immune support", "allergy relief"],
+        "location": "Munich"
+    },
+    {
+        "name": "GanzheitsPfad",
+        "type_of_practice": "Holistic Health Coach",
+        "keywords": ["lifestyle changes", "stress relief", "headache management", "wellness planning"],
+        "location": "Hamburg"
+    }
+]
